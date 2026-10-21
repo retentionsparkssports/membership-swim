@@ -1,84 +1,109 @@
+
 import React from 'react';
 import { Student } from '../types';
 import { BrandLogo } from './BrandLogo';
-import { ExpiryBanner } from './ExpiryBanner';
-import { formatGreetingParentName, getInitials } from '../lib/helpers';
+import { getInitials } from '../lib/helpers';
 
 interface DashboardPageProps {
   students: Student[];
   phone: string;
-  onSelectStudent: (studentId: string) => void;
+  onSelectStudent: (membershipId: string) => void;
   onBackToHome: () => void;
 }
 
 export const DashboardPage: React.FC<DashboardPageProps> = ({
   students,
-  phone: _phone,
+  phone,
   onSelectStudent,
   onBackToHome,
 }) => {
-  const parentsName = formatGreetingParentName(students[0]?.parentsName || '');
-  const greeting = parentsName ? `Halo, ${parentsName}!` : 'Halo!';
-
   return (
-    <div>
-      <div className="topbar">
-        <div className="topbar-logo">
-          <div className="topbar-logo-inner">
-            <BrandLogo size="small" />
-          </div>
+    <div className="card">
+      <BrandLogo />
+
+      <div className="divider" />
+
+      <p className="headline">Membership Swim Anak</p>
+      <p className="sub">
+        Berikut informasi membership yang terhubung dengan nomor WhatsApp
+        yang kamu masukkan.
+      </p>
+
+      <div className="membership-summary">
+        <div>
+          <span className="summary-label">Jumlah membership</span>
+          <strong>{students.length}</strong>
         </div>
       </div>
 
-      <div className="wrap">
-        <div className="greeting-card">
-          <div className="greeting-text">{greeting}</div>
-          <div className="greeting-sub">Yuk cek status membership si kecil di Sparks.</div>
+      {students.length === 0 ? (
+        <div className="empty-state">
+          <p>Belum ada membership yang dapat ditampilkan.</p>
         </div>
-
-        {students.length > 1 && (
-          <div className="multi-note">
-            👤 {students.length} anak terdaftar dengan nomor ini.
-          </div>
-        )}
-
-        {students.map((student) => (
-          <div key={student.studentId} className="student-card">
-            <div className="card-top">
-              <div className="avatar">{getInitials(student.studentName)}</div>
-              <div className="card-info">
-                <div className="student-name">
-                  {student.studentName || 'Nama belum tersedia'}
+      ) : (
+        <div className="student-list">
+          {students.map((student) => (
+            <div
+              className="student-card"
+              key={student.membershipId}
+            >
+              <div className="student-card-header">
+                <div className="student-avatar">
+                  {getInitials(student.studentName)}
                 </div>
-                <div className="student-id">{student.studentId}</div>
-                <div>
-                  <span className="center-badge">{student.center}</span>
+
+                <div className="student-info">
+                  <h3>{student.studentName || 'Nama belum tersedia'}</h3>
+                  <p>{student.center || 'Center belum tersedia'}</p>
                 </div>
               </div>
+
+              <div className="student-details">
+                <div className="detail-item">
+                  <span className="detail-label">ID siswa</span>
+                  <span className="detail-value">
+                    {student.studentId || '-'}
+                  </span>
+                </div>
+
+                <div className="detail-item">
+                  <span className="detail-label">Status membership</span>
+                  <span className="detail-value">
+                    {student.studentStatus || 'Belum tersedia'}
+                  </span>
+                </div>
+
+                <div className="session-grid">
+                  <div className="session-box">
+                    <span className="detail-label">Sesi terpakai</span>
+                    <strong>{student.sessionsUsed}</strong>
+                  </div>
+
+                  <div className="session-box">
+                    <span className="detail-label">Sesi tersisa</span>
+                    <strong>{student.sessionsRemaining}</strong>
+                  </div>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => onSelectStudent(student.membershipId)}
+              >
+                Lihat Riwayat Attendance →
+              </button>
             </div>
+          ))}
+        </div>
+      )}
 
-            <ExpiryBanner expiryDateStr={student.expiryDate} />
-
-            <button
-              type="button"
-              className="detail-btn"
-              onClick={() => onSelectStudent(student.studentId)}
-              style={{ width: '100%', border: 'none', cursor: 'pointer' }}
-            >
-              Lihat Detail Attendance →
-            </button>
-          </div>
-        ))}
-
-        <button
-          type="button"
-          className="back-link"
-          onClick={onBackToHome}
-          style={{ background: 'none', border: 'none', width: '100%', cursor: 'pointer' }}
-        >
-          ← Cek nomor lain
-        </button>
-      </div>
+      <button
+        type="button"
+        className="secondary-button"
+        onClick={onBackToHome}
+      >
+        Kembali
+      </button>
     </div>
   );
 };
