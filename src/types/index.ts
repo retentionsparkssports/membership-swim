@@ -1,30 +1,30 @@
+
 export interface Student {
-  center: string;
+  membershipId: string;
   studentId: string;
   studentName: string;
+  center: string;
   phone: string;
-  parentsName: string;
-  retentionX?: string | null;
-  expiryDateRaw?: string | null;
-  expiryDate: string;
-  sarName?: string | null;
-  waLink?: string | null;
+  studentStatus: string;
+  sessionsUsed: number;
+  sessionsRemaining: number;
 }
 
 export interface AttendanceRecord {
-  studentId: string;
-  studentName: string;
-  center: string;
+  attendanceId: string;
+  membershipId: string;
   rawDate: string;
   dateStr: string;
-  class_: string;
-  attendance: string;
-  makeupReason?: string;
-  statusClass?: string;
-  previousClass?: string;
-  previousDateStr?: string;
-  term?: string;
-  quarter?: string;
+  checkInTime: string;
+  attendanceStatus: string;
+  sessionType: string;
+  durationMinutes: number | null;
+  scheduledTime: string;
+  level: string;
+  ageGroup: string;
+  coach: string;
+  studentAdvisor: string;
+  coachNotes: string;
 }
 
 export interface ExpiryStatus {
