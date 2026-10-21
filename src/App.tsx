@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { Student, AttendanceRecord } from './types';
 import {
@@ -25,8 +26,9 @@ type ViewMode =
 export const App: React.FC = () => {
   const [view, setView] = useState<ViewMode>('loading');
   const [loadingTitle, setLoadingTitle] = useState('Memuat data');
-  const [loadingSubtitle, setLoadingSubtitle] = useState('Mohon tunggu sebentar...');
-
+  const [loadingSubtitle, setLoadingSubtitle] = useState(
+    'Mohon tunggu sebentar...'
+  );
   const [currentPhone, setCurrentPhone] = useState('');
   const [students, setStudents] = useState<Student[]>([]);
   const [currentStudent, setCurrentStudent] = useState<Student | null>(null);
@@ -34,31 +36,33 @@ export const App: React.FC = () => {
   const [errorMessage, setErrorMessage] = useState('');
   const [isRetryingAttendance, setIsRetryingAttendance] = useState(false);
 
-  // Sync body class for center or dashboard pages
   useEffect(() => {
-    if (view === 'dashboard' || view === 'detail') {
-      document.body.className = 'dashboard-page';
-    } else {
-      document.body.className = 'center-page';
-    }
+    document.body.className =
+      view === 'dashboard' || view === 'detail'
+        ? 'dashboard-page'
+        : 'center-page';
   }, [view]);
 
-  // Handle URL change
   const loadFromUrl = useCallback(async () => {
     const params = new URLSearchParams(window.location.search);
     const phone = params.get('phone') || '';
-    const studentId = params.get('sid') || '';
+    const membershipId =
+      params.get('membership_id') || params.get('sid') || '';
 
     setCurrentPhone(phone);
+    setErrorMessage('');
 
-    if (studentId) {
-      setLoadingTitle('Memuat detail attendance');
+    if (membershipId && phone) {
+      setLoadingTitle('Memuat detail membership Swim');
       setLoadingSubtitle('Mohon tunggu sebentar.');
       setView('loading');
 
       try {
-        const student = await fetchStudentById(studentId);
+        const student = await fetchStudentById(membershipId, phone);
+
         if (!student) {
+          setCurrentStudent(null);
+          setAttendance([]);
           setView('not_found');
           return;
         }
@@ -66,83 +70,103 @@ export const App: React.FC = () => {
         setCurrentStudent(student);
 
         try {
-          const att = await fetchAttendanceForStudent(studentId);
-          setAttendance(att);
+          const records = await fetchAttendanceForStudent(
+            student.membershipId,
+            phone
+          );
+          setAttendance(records);
           setView('detail');
-        } catch (attErr) {
-          console.error('Failed to load attendance:', attErr);
+        } catch (attendanceError) {
+          console.error('Gagal memuat attendance Swim:', attendanceError);
           setView('attendance_error');
         }
-      } catch (err) {
-        console.error('Failed to load student by id:', err);
+      } catch (error) {
+        console.error('Gagal memuat membership Swim:', error);
         setErrorMessage(
-          `Data membership belum bisa dimuat. Silakan coba beberapa saat lagi atau hubungi ${SUPPORT_LABEL} untuk bantuan.`
+          `Data membership belum bisa dimuat. Silakan coba lagi atau hubungi ${SUPPORT_LABEL} untuk bantuan.`
         );
         setView('error');
       }
+
       return;
     }
 
     if (phone) {
-      setLoadingTitle('Mencari data membership');
+      setLoadingTitle('Mencari membership Swim');
       setLoadingSubtitle(
-        'Mohon tunggu sebentar. Kami sedang mencocokkan nomor WhatsApp yang kamu masukkan.'
+        'Kami sedang mencocokkan nomor WhatsApp yang kamu masukkan.'
       );
       setView('loading');
 
       try {
         const loadedStudents = await fetchStudentsByPhone(phone);
-        if (!loadedStudents || loadedStudents.length === 0) {
+
+        if (loadedStudents.length === 0) {
+          setStudents([]);
           setView('not_found');
           return;
         }
 
         setStudents(loadedStudents);
         setView('dashboard');
-      } catch (err) {
-        console.error('Failed to load students by phone:', err);
+      } catch (error) {
+        console.error('Gagal mencari membership Swim:', error);
         setErrorMessage(
-          `Data membership belum bisa dimuat. Silakan coba beberapa saat lagi atau hubungi ${SUPPORT_LABEL} untuk bantuan.`
+          `Data membership belum bisa dimuat. Silakan coba lagi atau hubungi ${SUPPORT_LABEL} untuk bantuan.`
         );
         setView('error');
       }
+
       return;
     }
 
-    // Default to Landing Page
+    setStudents([]);
+    setCurrentStudent(null);
+    setAttendance([]);
     setView('landing');
   }, []);
 
   useEffect(() => {
-    loadFromUrl();
+    void loadFromUrl();
 
     const handlePopState = () => {
-      loadFromUrl();
+      void loadFromUrl();
     };
 
     window.addEventListener('popstate', handlePopState);
-    return () => window.removeEventListener('popstate', handlePopState);
+
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+    };
   }, [loadFromUrl]);
 
   const handleSearch = (phone: string) => {
-    const newUrl = `${window.location.pathname}?phone=${encodeURIComponent(phone)}`;
-    window.history.pushState({}, '', newUrl);
-    loadFromUrl();
+    const url = new URL(window.location.href);
+    url.search = '';
+    url.searchParams.set('phone', phone);
+
+    window.history.pushState({}, '', url);
+    void loadFromUrl();
   };
 
-  const handleSelectStudent = (studentId: string) => {
-    const ph = encodeURIComponent(currentPhone);
-    const sid = encodeURIComponent(studentId);
-    const newUrl = `${window.location.pathname}?phone=${ph}&sid=${sid}`;
-    window.history.pushState({}, '', newUrl);
-    loadFromUrl();
+  const handleSelectStudent = (membershipId: string) => {
+    const url = new URL(window.location.href);
+    url.search = '';
+    url.searchParams.set('phone', currentPhone);
+    url.searchParams.set('membership_id', membershipId);
+
+    window.history.pushState({}, '', url);
+    void loadFromUrl();
   };
 
   const handleBackToDashboard = () => {
     if (currentPhone) {
-      const newUrl = `${window.location.pathname}?phone=${encodeURIComponent(currentPhone)}`;
-      window.history.pushState({}, '', newUrl);
-      loadFromUrl();
+      const url = new URL(window.location.href);
+      url.search = '';
+      url.searchParams.set('phone', currentPhone);
+
+      window.history.pushState({}, '', url);
+      void loadFromUrl();
     } else {
       handleBackToHome();
     }
@@ -154,17 +178,25 @@ export const App: React.FC = () => {
     setStudents([]);
     setCurrentStudent(null);
     setAttendance([]);
+    setErrorMessage('');
     setView('landing');
   };
 
   const handleRetryAttendance = async () => {
-    if (!currentStudent) return;
+    if (!currentStudent || !currentPhone) return;
+
     setIsRetryingAttendance(true);
+
     try {
-      const att = await fetchAttendanceForStudent(currentStudent.studentId);
-      setAttendance(att);
+      const records = await fetchAttendanceForStudent(
+        currentStudent.membershipId,
+        currentPhone
+      );
+
+      setAttendance(records);
       setView('detail');
-    } catch {
+    } catch (error) {
+      console.error('Gagal mencoba ulang attendance:', error);
       setView('attendance_error');
     } finally {
       setIsRetryingAttendance(false);
@@ -178,7 +210,10 @@ export const App: React.FC = () => {
       )}
 
       {view === 'landing' && (
-        <LandingPage onSearch={handleSearch} initialPhone={currentPhone} />
+        <LandingPage
+          onSearch={handleSearch}
+          initialPhone={currentPhone}
+        />
       )}
 
       {view === 'dashboard' && (
@@ -199,11 +234,17 @@ export const App: React.FC = () => {
       )}
 
       {view === 'not_found' && (
-        <NotFoundPage phone={currentPhone} onBackToHome={handleBackToHome} />
+        <NotFoundPage
+          phone={currentPhone}
+          onBackToHome={handleBackToHome}
+        />
       )}
 
       {view === 'error' && (
-        <ErrorPage message={errorMessage} onBack={handleBackToHome} />
+        <ErrorPage
+          message={errorMessage}
+          onBack={handleBackToHome}
+        />
       )}
 
       {view === 'attendance_error' && (
@@ -216,4 +257,5 @@ export const App: React.FC = () => {
     </main>
   );
 };
+
 export default App;
