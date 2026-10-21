@@ -14,12 +14,12 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({ size = 'normal' }) => {
         <img
           src="/logo.png"
           className={isSmall ? 'logo-img small' : 'logo-img'}
-          alt="Sparks Sports Academy"
+          alt="Sparks Swim Academy"
           onError={() => setImgError(true)}
         />
       ) : (
         <div className={`logo-fallback ${isSmall ? 'white' : ''}`}>
-          Sparks <span className="star">★</span> {isSmall ? 'Sports Academy' : ''}
+          Sparks <span className="star">★</span> {isSmall ? 'Swim Academy' : ''}
         </div>
       )}
     </div>
