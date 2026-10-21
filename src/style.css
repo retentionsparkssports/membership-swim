@@ -1170,3 +1170,385 @@ button:disabled {
   color: #2b6cb0;
   font-weight: 700;
 }
+
+
+/* ========================
+   SWIM MEMBERSHIP
+   ======================== */
+
+/* Lebarkan dashboard dan detail agar riwayat attendance nyaman dibaca */
+body.dashboard-page #app > .card {
+  width: calc(100% - 32px);
+  max-width: 760px;
+  margin: 24px auto;
+  text-align: left;
+}
+
+body.dashboard-page .logo-wrap {
+  justify-content: center;
+}
+
+/* Judul halaman */
+body.dashboard-page .headline {
+  text-align: left;
+}
+
+body.dashboard-page .sub {
+  line-height: 1.6;
+}
+
+/* Ringkasan membership */
+.membership-summary {
+  display: flex;
+  margin-bottom: 18px;
+}
+
+.membership-summary > div {
+  width: 100%;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: #f8fdfb;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.membership-summary strong {
+  font-size: 22px;
+  color: var(--green-dark);
+}
+
+.summary-label {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+/* Kartu siswa */
+.student-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.student-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+  margin-bottom: 0;
+}
+
+.student-card-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.student-avatar {
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 14px;
+  background: var(--green-bg);
+  color: var(--green-dark);
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.student-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.student-info h3,
+.student-info h2 {
+  font-size: 16px;
+  font-weight: 800;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+  margin-bottom: 3px;
+}
+
+.student-info p {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+/* Informasi membership */
+.student-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin-bottom: 18px;
+}
+
+.detail-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 11px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.detail-label {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.detail-value {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+
+.session-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.session-box {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+  border: 1px solid #d9f0e5;
+  border-radius: 12px;
+  background: #f5fcf8;
+}
+
+.session-box strong {
+  font-size: 24px;
+  line-height: 1.2;
+  color: var(--green-dark);
+}
+
+/* Tombol sekunder */
+button.secondary-button {
+  width: 100%;
+  min-height: 44px;
+  height: auto;
+  padding: 12px 16px;
+  margin-top: 14px;
+  background: #f4f6f5;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: #444;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+button.secondary-button:hover {
+  background: #e9eeeb;
+  color: #222;
+}
+
+/* Detail attendance */
+.detail-student-header {
+  margin-top: 20px;
+  padding: 18px;
+  background: #f8fdfb;
+  border: 1px solid #e0f2e9;
+  border-radius: 14px;
+}
+
+.attendance-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin: 18px 0;
+}
+
+.attendance-summary .session-box {
+  padding: 12px;
+}
+
+.attendance-summary .session-box strong {
+  font-size: 21px;
+}
+
+.attendance-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 16px;
+}
+
+.attendance-card {
+  min-width: 0;
+  padding: 18px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--white);
+}
+
+.attendance-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.attendance-card-header > div {
+  min-width: 0;
+}
+
+.attendance-card-header strong {
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.attendance-card-header .sub {
+  margin: 4px 0 0;
+  font-size: 12px;
+}
+
+.attendance-status {
+  display: inline-block;
+  max-width: 50%;
+  padding: 5px 9px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 800;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+.status-present {
+  background: var(--green-bg);
+  color: #1a6b46;
+}
+
+.status-absent {
+  background: var(--red-bg);
+  color: var(--red);
+}
+
+.status-cancelled {
+  background: var(--orange-bg);
+  color: var(--orange);
+}
+
+.status-other {
+  background: #f0f2f5;
+  color: #555;
+}
+
+.attendance-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 20px;
+}
+
+.attendance-fields .detail-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+.attendance-fields .detail-value {
+  text-align: left;
+}
+
+.coach-notes {
+  margin-top: 12px;
+  padding: 12px;
+  border-radius: 10px;
+  background: #f8f9fa;
+}
+
+.coach-notes p {
+  margin-top: 6px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: #444;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+/* Kondisi data kosong */
+.empty-state {
+  padding: 24px 16px;
+  border: 1px dashed var(--border);
+  border-radius: 12px;
+  background: #fafbfa;
+  color: var(--muted);
+  text-align: center;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.empty-state p {
+  margin: 0;
+}
+
+/* Tampilan ponsel */
+@media (max-width: 480px) {
+  body.dashboard-page #app > .card {
+    width: calc(100% - 20px);
+    margin: 10px auto;
+    padding: 24px 16px;
+    border-radius: 16px;
+  }
+
+  .student-card {
+    padding: 16px;
+  }
+
+  .attendance-card {
+    padding: 14px;
+  }
+
+  .attendance-summary {
+    gap: 6px;
+  }
+
+  .attendance-summary .session-box {
+    padding: 10px 8px;
+  }
+
+  .attendance-summary .session-box strong {
+    font-size: 18px;
+  }
+
+  .attendance-summary .detail-label {
+    font-size: 10px;
+  }
+
+  .attendance-fields {
+    grid-template-columns: 1fr;
+  }
+
+  .attendance-card-header {
+    flex-direction: column;
+  }
+
+  .attendance-status {
+    max-width: 100%;
+  }
+
+  .student-info h2,
+  .student-info h3 {
+    font-size: 15px;
+  }
+
+  .session-box strong {
+    font-size: 21px;
+  }
+}
+
