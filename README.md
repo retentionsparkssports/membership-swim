@@ -1,6 +1,6 @@
-# Sparks Sports Academy - Membership Swim
+# Sparks Swim Academy - Membership Swim
 
-A modern React (Vite + TypeScript) web application for parents to check their children's swimming membership status and attendance history at Sparks Sports Academy.
+A modern React (Vite + TypeScript) web application for parents to check their children's swimming membership status and attendance history at Sparks Swim Academy.
 
 ## Features
 

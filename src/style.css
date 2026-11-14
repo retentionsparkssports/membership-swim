@@ -5,8 +5,8 @@
 }
 
 :root {
-  --green: #2db87a;
-  --green-dark: #25a36b;
+  --green: #27bfc9;
+  --green-dark: #1573ba;
   --green-bg: #e6f7f0;
   --yellow: #f5a623;
   --bg: #f0f2f5;
@@ -496,7 +496,7 @@ button:disabled {
 .logo-fallback {
   font-size: 32px;
   font-weight: 800;
-  color: #2db87a;
+  color: #27bfc9;
   letter-spacing: -1px;
   line-height: 1;
 }
@@ -521,7 +521,7 @@ button:disabled {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #2db87a;
+  color: #27bfc9;
   background: #f7fffb;
   border-right: 1.5px solid #e0e0e0;
   flex-shrink: 0;
@@ -538,7 +538,7 @@ button:disabled {
   height: 68px;
   border-radius: 50%;
   background: #e6f7f0;
-  color: #2db87a;
+  color: #27bfc9;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -587,7 +587,7 @@ button:disabled {
   margin-left: 4px;
   font-size: 10px;
   font-weight: 800;
-  color: #2db87a;
+  color: #27bfc9;
   background: #ffffff;
   border: 1px solid rgba(45, 184, 122, 0.28);
   border-radius: 999px;
@@ -733,7 +733,7 @@ button:disabled {
   flex-shrink: 0;
 }
 
-.dot-present { background: #2db87a; }
+.dot-present { background: #27bfc9; }
 .dot-makeup  { background: #7F77DD; }
 .dot-absent  { background: #E24B4A; }
 .dot-leave   { background: #EF9F27; }

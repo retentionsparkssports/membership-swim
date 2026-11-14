@@ -24,39 +24,64 @@ function formatDuration(value: number | null): string {
   if (value === null) return '-';
   return `${value} menit`;
 }
+const leaveStatuses = new Set<string>([
+  'sakit - rescheduled',
+  'tanggal merah - rescheduled',
+  'izin - rescheduled',
+  'ops cancellation - rescheduled',
+]);
 
 function statusClass(status: string): string {
-  const normalized = status.toLowerCase();
+  const normalized = status.trim().toLowerCase();
 
-  if (normalized.includes('present') || normalized.includes('hadir')) {
+  if (normalized === 'completed') {
     return 'attendance-status status-present';
   }
 
-  if (normalized.includes('absent') || normalized.includes('tidak hadir')) {
+  if (normalized === 'tidak hadir') {
     return 'attendance-status status-absent';
   }
 
-  if (normalized.includes('cancel') || normalized.includes('batal')) {
+  if (leaveStatuses.has(normalized)) {
     return 'attendance-status status-cancelled';
   }
 
   return 'attendance-status status-other';
 }
 
+
 export const DetailPage: React.FC<DetailPageProps> = ({
   student,
   attendance,
   onBackToDashboard,
 }) => {
-  const presentCount = attendance.filter((record) => {
-    const status = record.attendanceStatus.toLowerCase();
-    return status.includes('present') || status.includes('hadir');
-  }).length;
+    
+const normalizeAttendanceStatus = (status: string | null | undefined): string =>
+  (status ?? '').trim().toLowerCase();
 
-  const absentCount = attendance.filter((record) => {
-    const status = record.attendanceStatus.toLowerCase();
-    return status.includes('absent') || status.includes('tidak hadir');
-  }).length;
+const visibleAttendance = attendance.filter((record) => {
+  const status = normalizeAttendanceStatus(record.attendanceStatus);
+
+  return (
+    status === 'completed' ||
+    leaveStatuses.has(status) ||
+    status === 'tidak hadir'
+  );
+});
+
+const presentCount = visibleAttendance.filter(
+  (record) => normalizeAttendanceStatus(record.attendanceStatus) === 'completed'
+).length;
+
+const leaveCount = visibleAttendance.filter((record) =>
+  leaveStatuses.has(normalizeAttendanceStatus(record.attendanceStatus))
+).length;
+
+const absentCount = visibleAttendance.filter(
+  (record) => normalizeAttendanceStatus(record.attendanceStatus) === 'tidak hadir'
+).length;
+
+
 
   return (
     <div className="card">
@@ -114,33 +139,33 @@ export const DetailPage: React.FC<DetailPageProps> = ({
 
       <h3>Riwayat Attendance</h3>
       <p className="sub">
-        Menampilkan {attendance.length} catatan attendance untuk membership ini.
+        Menampilkan {visibleAttendance.length} catatan attendance untuk membership ini.
       </p>
 
       <div className="attendance-summary">
-        <div className="session-box">
-          <span className="detail-label">Total catatan</span>
-          <strong>{attendance.length}</strong>
-        </div>
-
         <div className="session-box">
           <span className="detail-label">Hadir</span>
           <strong>{presentCount}</strong>
         </div>
 
         <div className="session-box">
-          <span className="detail-label">Tidak hadir</span>
+          <span className="detail-label">Leave</span>
+          <strong>{leaveCount}</strong>
+        </div>
+
+        <div className="session-box">
+          <span className="detail-label">Tidak Hadir</span>
           <strong>{absentCount}</strong>
         </div>
       </div>
 
-      {attendance.length === 0 ? (
+      {visibleAttendance.length === 0 ? (
         <div className="empty-state">
           <p>Belum ada riwayat attendance untuk membership ini.</p>
         </div>
       ) : (
         <div className="attendance-list">
-          {attendance.map((record) => (
+          {visibleAttendance.map((record) => (
             <article
               className="attendance-card"
               key={record.attendanceId}

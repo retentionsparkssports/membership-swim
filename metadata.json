@@ -1,6 +1,6 @@
 {
-  "name": "Sparks Sports Academy - Membership Swim",
-  "description": "Cek status membership dan riwayat attendance murid Sparks Sports Academy.",
+  "name": "Sparks Swim Academy - Membership Swim",
+  "description": "Cek status membership dan riwayat attendance murid Sparks Swim Academy.",
   "permissions": [],
   "capabilities": [
     "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"

@@ -1,7 +1,7 @@
 import { ExpiryStatus } from '../types';
 
 export const SUPPORT_WA = 'https://wa.me/6281390006606';
-export const SUPPORT_LABEL = 'Tim Customer Support Sparks Sports';
+export const SUPPORT_LABEL = 'Tim Customer Support Sparks Swim';
 
 export function cleanCell(v: unknown): string {
   if (v === null || v === undefined) return '';

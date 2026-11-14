@@ -103,7 +103,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onSearch, initialPhone
               style={{
                 background: 'none',
                 border: 'none',
-                color: '#2db87a',
+                color: '#f5b54b',
                 fontSize: '11px',
                 fontWeight: 700,
                 cursor: 'pointer',
