@@ -1,39 +1,38 @@
 import React, { useState } from 'react';
 import { BrandLogo } from './BrandLogo';
-import { SUPPORT_WA, SUPPORT_LABEL } from '../lib/helpers';
+import {
+  normalizeWhatsAppPhone,
+  SUPPORT_WA,
+  SUPPORT_LABEL,
+} from '../lib/helpers';
 
 interface LandingPageProps {
   onSearch: (phone: string) => void;
   initialPhone?: string;
+  initialValidationError?: string;
 }
 
-export const LandingPage: React.FC<LandingPageProps> = ({ onSearch, initialPhone = '' }) => {
+export const LandingPage: React.FC<LandingPageProps> = ({
+  onSearch,
+  initialPhone = '',
+  initialValidationError = '',
+}) => {
   const [phoneNumber, setPhoneNumber] = useState(
-    initialPhone.replace(/^62/, '').replace(/^0/, '')
+    initialPhone.replace(/^\+?62/, '').replace(/^0/, '')
   );
-  const [validationError, setValidationError] = useState('');
+  const [validationError, setValidationError] = useState(initialValidationError);
 
   const handleSubmit = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     setValidationError('');
-    let raw = phoneNumber.trim().replace(/[^0-9]/g, '');
+    const result = normalizeWhatsAppPhone(phoneNumber);
 
-    if (!raw) {
-      setValidationError('Masukkan nomor WhatsApp terlebih dahulu.');
-      return;
-    }
-    if (raw.length < 8) {
-      setValidationError('Nomor terlalu pendek.');
+    if (!result.valid) {
+      setValidationError(result.error);
       return;
     }
 
-    if (raw.startsWith('0')) {
-      raw = '62' + raw.slice(1);
-    } else if (raw.startsWith('8')) {
-      raw = '62' + raw;
-    }
-
-    onSearch(raw);
+    onSearch(result.phone);
   };
 
   const handleQuickDemo = () => {
@@ -72,11 +71,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onSearch, initialPhone
             placeholder="8111000549"
             inputMode="numeric"
             autoComplete="tel"
-            maxLength={16}
+            maxLength={24}
             value={phoneNumber}
             onChange={(e) => {
               setValidationError('');
-              setPhoneNumber(e.target.value.replace(/[^0-9]/g, ''));
+              setPhoneNumber(e.target.value);
             }}
           />
         </div>
@@ -95,7 +94,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onSearch, initialPhone
             }}
           >
             <p className="hint" style={{ margin: 0 }}>
-              Tanpa angka 0 di depan. Contoh: 8111000549
+              Format: 08..., 62..., atau +62...
             </p>
             <button
               type="button"

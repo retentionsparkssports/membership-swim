@@ -3,6 +3,58 @@ import { ExpiryStatus } from '../types';
 export const SUPPORT_WA = 'https://wa.me/6281390006606';
 export const SUPPORT_LABEL = 'Tim Customer Support Sparks Swim';
 
+export type WhatsAppPhoneValidation =
+  | { valid: true; phone: string }
+  | { valid: false; error: string };
+
+export function normalizeWhatsAppPhone(value: string): WhatsAppPhoneValidation {
+  const input = value.trim();
+
+  if (!input) {
+    return { valid: false, error: 'Masukkan nomor WhatsApp terlebih dahulu.' };
+  }
+
+  if (!/^\+?[\d\s().-]+$/.test(input)) {
+    return { valid: false, error: 'Format nomor WhatsApp tidak valid.' };
+  }
+
+  const digits = input.replace(/\D/g, '');
+
+  if (input.length > 24) {
+    return { valid: false, error: 'Format nomor WhatsApp tidak valid.' };
+  }
+
+  if (digits.length < 8) {
+    return { valid: false, error: 'Nomor terlalu pendek.' };
+  }
+
+  if (digits.length > 16) {
+    return { valid: false, error: 'Format nomor WhatsApp tidak valid.' };
+  }
+
+  if (input.startsWith('+') && !digits.startsWith('62')) {
+    return { valid: false, error: 'Format nomor WhatsApp tidak valid.' };
+  }
+
+  if (digits.startsWith('0')) {
+    if (!digits.startsWith('08')) {
+      return { valid: false, error: 'Format nomor WhatsApp tidak valid.' };
+    }
+
+    return { valid: true, phone: `62${digits.slice(1)}` };
+  }
+
+  if (digits.startsWith('8')) {
+    return { valid: true, phone: `62${digits}` };
+  }
+
+  if (digits.startsWith('62') && digits.startsWith('628')) {
+    return { valid: true, phone: digits };
+  }
+
+  return { valid: false, error: 'Format nomor WhatsApp tidak valid.' };
+}
+
 export function cleanCell(v: unknown): string {
   if (v === null || v === undefined) return '';
   return String(v).trim();

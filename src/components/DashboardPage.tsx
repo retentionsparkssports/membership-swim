@@ -6,14 +6,12 @@ import { getInitials } from '../lib/helpers';
 
 interface DashboardPageProps {
   students: Student[];
-  phone: string;
   onSelectStudent: (membershipId: string) => void;
   onBackToHome: () => void;
 }
 
 export const DashboardPage: React.FC<DashboardPageProps> = ({
   students,
-  phone,
   onSelectStudent,
   onBackToHome,
 }) => {

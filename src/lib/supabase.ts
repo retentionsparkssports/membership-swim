@@ -1,7 +1,11 @@
 
 import { createClient } from '@supabase/supabase-js';
 import { Student, AttendanceRecord } from '../types';
-import { formatDisplayDate, cleanCell } from './helpers';
+import {
+  formatDisplayDate,
+  cleanCell,
+  normalizeWhatsAppPhone,
+} from './helpers';
 
 const SUPABASE_URL = 'https://kiwgfcxuyozogqkskxow.supabase.co';
 const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_6lOq9casbX4_fkcfjagyAg_p8cfk3fU';
@@ -80,11 +84,13 @@ interface SupabaseAttendanceRow {
 export async function fetchStudentsByPhone(
   phone: string
 ): Promise<Student[]> {
-  const normalizedPhone = cleanCell(phone);
+  const result = normalizeWhatsAppPhone(phone);
 
-  if (!normalizedPhone) {
+  if (!result.valid) {
     return [];
   }
+
+  const normalizedPhone = result.phone;
 
   const rows = await withRetry(async () => {
     const { data, error } = await supabase.rpc(
@@ -117,11 +123,13 @@ export async function fetchStudentById(
   membershipId: string,
   phone: string
 ): Promise<Student | null> {
-  if (!cleanCell(membershipId) || !cleanCell(phone)) {
+  const result = normalizeWhatsAppPhone(phone);
+
+  if (!cleanCell(membershipId) || !result.valid) {
     return null;
   }
 
-  const students = await fetchStudentsByPhone(phone);
+  const students = await fetchStudentsByPhone(result.phone);
 
   return (
     students.find(
@@ -137,7 +145,9 @@ export async function fetchAttendanceForStudent(
   membershipId: string,
   phone: string
 ): Promise<AttendanceRecord[]> {
-  if (!cleanCell(membershipId) || !cleanCell(phone)) {
+  const result = normalizeWhatsAppPhone(phone);
+
+  if (!cleanCell(membershipId) || !result.valid) {
     return [];
   }
 
@@ -146,7 +156,7 @@ export async function fetchAttendanceForStudent(
       'get_swim_attendance_by_membership',
       {
         p_membership_id: membershipId,
-        p_phone: cleanCell(phone),
+        p_phone: result.phone,
       }
     );
 

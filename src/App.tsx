@@ -1,12 +1,12 @@
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Student, AttendanceRecord } from './types';
 import {
   fetchStudentsByPhone,
   fetchStudentById,
   fetchAttendanceForStudent,
 } from './lib/supabase';
-import { SUPPORT_LABEL } from './lib/helpers';
+import { normalizeWhatsAppPhone, SUPPORT_LABEL } from './lib/helpers';
 import { LandingPage } from './components/LandingPage';
 import { DashboardPage } from './components/DashboardPage';
 import { DetailPage } from './components/DetailPage';
@@ -20,6 +20,7 @@ type ViewMode =
   | 'dashboard'
   | 'detail'
   | 'not_found'
+  | 'invalid_phone'
   | 'error'
   | 'attendance_error';
 
@@ -35,6 +36,11 @@ export const App: React.FC = () => {
   const [attendance, setAttendance] = useState<AttendanceRecord[]>([]);
   const [errorMessage, setErrorMessage] = useState('');
   const [isRetryingAttendance, setIsRetryingAttendance] = useState(false);
+  const [phoneValidationError, setPhoneValidationError] = useState('');
+  const urlLoadInProgress = useRef(false);
+  const activeUrlSearch = useRef<string | null>(null);
+  const pendingUrlLoad = useRef(false);
+  const attendanceRetryInProgress = useRef(false);
 
   useEffect(() => {
     document.body.className =
@@ -44,86 +50,132 @@ export const App: React.FC = () => {
   }, [view]);
 
   const loadFromUrl = useCallback(async () => {
-    const params = new URLSearchParams(window.location.search);
-    const phone = params.get('phone') || '';
-    const membershipId =
-      params.get('membership_id') || params.get('sid') || '';
+    const search = window.location.search;
 
-    setCurrentPhone(phone);
-    setErrorMessage('');
+    if (urlLoadInProgress.current) {
+      if (search !== activeUrlSearch.current) {
+        pendingUrlLoad.current = true;
+      }
+      return;
+    }
 
-    if (membershipId && phone) {
-      setLoadingTitle('Memuat detail membership Swim');
-      setLoadingSubtitle('Mohon tunggu sebentar.');
-      setView('loading');
+    urlLoadInProgress.current = true;
+    activeUrlSearch.current = search;
 
-      try {
-        const student = await fetchStudentById(membershipId, phone);
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const rawPhone = params.get('phone') || '';
+      const membershipId =
+        params.get('membership_id') || params.get('sid') || '';
+      let phone = '';
 
-        if (!student) {
+      if (rawPhone) {
+        const result = normalizeWhatsAppPhone(rawPhone);
+
+        if (!result.valid) {
+          setCurrentPhone(rawPhone);
+          setStudents([]);
           setCurrentStudent(null);
           setAttendance([]);
-          setView('not_found');
+          setPhoneValidationError(result.error);
+          setView('invalid_phone');
           return;
         }
 
-        setCurrentStudent(student);
+        phone = result.phone;
+        setCurrentPhone(phone);
+        setPhoneValidationError('');
+      } else {
+        setCurrentPhone('');
+        setPhoneValidationError('');
+      }
+
+      setErrorMessage('');
+
+      if (membershipId && phone) {
+        setLoadingTitle('Memuat detail membership Swim');
+        setLoadingSubtitle('Mohon tunggu sebentar.');
+        setView('loading');
 
         try {
-          const records = await fetchAttendanceForStudent(
-            student.membershipId,
-            phone
+          const student = await fetchStudentById(membershipId, phone);
+
+          if (!student) {
+            setCurrentStudent(null);
+            setAttendance([]);
+            setView('not_found');
+            return;
+          }
+
+          setCurrentStudent(student);
+
+          try {
+            const records = await fetchAttendanceForStudent(
+              student.membershipId,
+              phone
+            );
+            setAttendance(records);
+            setView('detail');
+          } catch (attendanceError) {
+            console.error('Gagal memuat attendance Swim:', attendanceError);
+            setView('attendance_error');
+          }
+        } catch (error) {
+          console.error('Gagal memuat membership Swim:', error);
+          setErrorMessage(
+            `Data membership belum bisa dimuat. Silakan coba lagi atau hubungi ${SUPPORT_LABEL} untuk bantuan.`
           );
-          setAttendance(records);
-          setView('detail');
-        } catch (attendanceError) {
-          console.error('Gagal memuat attendance Swim:', attendanceError);
-          setView('attendance_error');
-        }
-      } catch (error) {
-        console.error('Gagal memuat membership Swim:', error);
-        setErrorMessage(
-          `Data membership belum bisa dimuat. Silakan coba lagi atau hubungi ${SUPPORT_LABEL} untuk bantuan.`
-        );
-        setView('error');
-      }
-
-      return;
-    }
-
-    if (phone) {
-      setLoadingTitle('Mencari membership Swim');
-      setLoadingSubtitle(
-        'Kami sedang mencocokkan nomor WhatsApp yang kamu masukkan.'
-      );
-      setView('loading');
-
-      try {
-        const loadedStudents = await fetchStudentsByPhone(phone);
-
-        if (loadedStudents.length === 0) {
-          setStudents([]);
-          setView('not_found');
-          return;
+          setView('error');
         }
 
-        setStudents(loadedStudents);
-        setView('dashboard');
-      } catch (error) {
-        console.error('Gagal mencari membership Swim:', error);
-        setErrorMessage(
-          `Data membership belum bisa dimuat. Silakan coba lagi atau hubungi ${SUPPORT_LABEL} untuk bantuan.`
-        );
-        setView('error');
+        return;
       }
 
-      return;
-    }
+      if (phone) {
+        setLoadingTitle('Mencari membership Swim');
+        setLoadingSubtitle(
+          'Kami sedang mencocokkan nomor WhatsApp yang kamu masukkan.'
+        );
+        setView('loading');
 
-    setStudents([]);
-    setCurrentStudent(null);
-    setAttendance([]);
-    setView('landing');
+        try {
+          const loadedStudents = await fetchStudentsByPhone(phone);
+
+          if (loadedStudents.length === 0) {
+            setStudents([]);
+            setView('not_found');
+            return;
+          }
+
+          setStudents(loadedStudents);
+          setView('dashboard');
+        } catch (error) {
+          console.error('Gagal mencari membership Swim:', error);
+          setErrorMessage(
+            `Data membership belum bisa dimuat. Silakan coba lagi atau hubungi ${SUPPORT_LABEL} untuk bantuan.`
+          );
+          setView('error');
+        }
+
+        return;
+      }
+
+      setStudents([]);
+      setCurrentStudent(null);
+      setAttendance([]);
+      setView('landing');
+    } finally {
+      const shouldLoadPending =
+        pendingUrlLoad.current &&
+        window.location.search !== activeUrlSearch.current;
+      pendingUrlLoad.current = false;
+      activeUrlSearch.current = null;
+      urlLoadInProgress.current = false;
+
+      if (shouldLoadPending) {
+        void loadFromUrl();
+      }
+    }
   }, []);
 
   useEffect(() => {
@@ -183,8 +235,15 @@ export const App: React.FC = () => {
   };
 
   const handleRetryAttendance = async () => {
-    if (!currentStudent || !currentPhone) return;
+    if (
+      !currentStudent ||
+      !currentPhone ||
+      attendanceRetryInProgress.current
+    ) {
+      return;
+    }
 
+    attendanceRetryInProgress.current = true;
     setIsRetryingAttendance(true);
 
     try {
@@ -199,6 +258,7 @@ export const App: React.FC = () => {
       console.error('Gagal mencoba ulang attendance:', error);
       setView('attendance_error');
     } finally {
+      attendanceRetryInProgress.current = false;
       setIsRetryingAttendance(false);
     }
   };
@@ -211,15 +271,25 @@ export const App: React.FC = () => {
 
       {view === 'landing' && (
         <LandingPage
+          key={currentPhone}
           onSearch={handleSearch}
           initialPhone={currentPhone}
+          initialValidationError={phoneValidationError}
+        />
+      )}
+
+      {view === 'invalid_phone' && (
+        <LandingPage
+          key={currentPhone}
+          onSearch={handleSearch}
+          initialPhone={currentPhone}
+          initialValidationError={phoneValidationError}
         />
       )}
 
       {view === 'dashboard' && (
         <DashboardPage
           students={students}
-          phone={currentPhone}
           onSelectStudent={handleSelectStudent}
           onBackToHome={handleBackToHome}
         />
